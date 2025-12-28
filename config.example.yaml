@@ -1,0 +1,15 @@
+# Ruckus vSZ MCP Server Configuration Example
+# Copy this file to config.yaml and configure for your environment
+
+ruckus_vsz:
+  url: "https://your-vsz-controller.example.com:8443"
+  username: "admin"
+  password: "your_secure_password"
+  verify_ssl: true
+  timeout: 30
+  api_version: "v11_0"
+
+server:
+  host: "0.0.0.0"
+  port: 8082
+  log_level: "INFO"

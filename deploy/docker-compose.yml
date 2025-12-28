@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  ruckus-vsz-mcp:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: ruckus-vsz-mcp-server
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      # Ruckus vSZ Configuration
+      - RUCKUS_VSZ_URL=${RUCKUS_VSZ_URL}
+      - RUCKUS_VSZ_USERNAME=${RUCKUS_VSZ_USERNAME}
+      - RUCKUS_VSZ_PASSWORD=${RUCKUS_VSZ_PASSWORD}
+      - RUCKUS_VSZ_VERIFY_SSL=${RUCKUS_VSZ_VERIFY_SSL:-true}
+      - RUCKUS_VSZ_TIMEOUT=${RUCKUS_VSZ_TIMEOUT:-30}
+      - RUCKUS_VSZ_API_VERSION=${RUCKUS_VSZ_API_VERSION:-v11_0}
+      # Server Settings
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SERVER_PORT=${SERVER_PORT:-8082}
+    networks:
+      - ruckus-vsz-mcp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  ruckus-vsz-mcp-network:
+    driver: bridge

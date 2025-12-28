@@ -1,0 +1,8 @@
+# Ruckus vSZ MCP Server - Python Dependencies
+
+mcp>=1.1.0
+requests>=2.32.0
+pydantic>=2.7
+pydantic-settings>=2.2
+fastapi>=0.110
+uvicorn[standard]>=0.24

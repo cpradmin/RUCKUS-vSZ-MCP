@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ruckus-vsz-mcp-server"
+version = "1.0.0"
+description = "MCP server for Ruckus Virtual SmartZone wireless controller management"
+authors = [{name = "0xEkho"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.1.0",
+    "requests>=2.32.0",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.2",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.24",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = ["mcp", "ruckus", "vsz", "smartzone", "wireless", "wifi", "network"]
+
+[project.urls]
+Homepage = "https://github.com/0xEkho/RUCKUS-vSZ-MCP"
+Repository = "https://github.com/0xEkho/RUCKUS-vSZ-MCP"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24.0",
+    "black>=24.8.0",
+    "isort>=5.13.2",
+    "mypy>=1.8.0",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+ruckus-vsz-mcp-server = "ruckus_vsz_server.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ruckus_vsz_server*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
