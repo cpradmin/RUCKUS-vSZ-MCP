@@ -16,13 +16,30 @@ class NetworkModule:
     def list_vlan_pools(self, zone_id: str) -> Dict[str, Any]:
         """List VLAN pools.
         
+        Multi-version: tries multiple endpoints for different vSZ versions.
+        
         Args:
             zone_id: Zone UUID
             
         Returns:
             List of VLAN pools
         """
-        return self.client.get(f"rkszones/{zone_id}/vlanpools")
+        # Try different endpoint patterns
+        for endpoint in [
+            f"rkszones/{zone_id}/vlanpools",
+            f"rkszones/{zone_id}/vlanPoolProfiles",
+            f"rkszones/{zone_id}/diffServ/vlanpoolprofiles"
+        ]:
+            try:
+                return self.client.get(endpoint)
+            except Exception:
+                continue
+        
+        return {
+            "list": [],
+            "totalCount": 0,
+            "error": "VLAN pools not available. This feature may require vSZ 7.x+ or different license."
+        }
 
     def get_vlan_pool(self, zone_id: str, pool_id: str) -> Dict[str, Any]:
         """Get VLAN pool details.
@@ -123,13 +140,30 @@ class NetworkModule:
     def list_qos_profiles(self, zone_id: str) -> Dict[str, Any]:
         """List QoS profiles.
         
+        Multi-version: tries multiple endpoints for different vSZ versions.
+        
         Args:
             zone_id: Zone UUID
             
         Returns:
             List of QoS profiles
         """
-        return self.client.get(f"rkszones/{zone_id}/qos")
+        # Try different endpoint patterns
+        for endpoint in [
+            f"rkszones/{zone_id}/qos",
+            f"rkszones/{zone_id}/diffServ/qos",
+            f"rkszones/{zone_id}/qosProfiles"
+        ]:
+            try:
+                return self.client.get(endpoint)
+            except Exception:
+                continue
+        
+        return {
+            "list": [],
+            "totalCount": 0,
+            "error": "QoS profiles not available. This feature may require vSZ 7.x+ or different license."
+        }
 
     def get_qos_profile(self, zone_id: str, profile_id: str) -> Dict[str, Any]:
         """Get QoS profile details.
@@ -152,7 +186,7 @@ class NetworkModule:
         Returns:
             List of application policies
         """
-        return self.client.get(f"rkszones/{zone_id}/applicaitonPolicyProfile")
+        return self.client.get(f"rkszones/{zone_id}/applicationPolicyProfile")
 
     def list_dhcp_profiles(self, zone_id: str) -> Dict[str, Any]:
         """List DHCP profiles.

@@ -1,13 +1,59 @@
-# Ruckus vSZ MCP Server Configuration Example
-# Copy this file to config.yaml and configure for your environment
+# Ruckus vSZ MCP Server Configuration
+# Copy to config.yaml and customize
 
-ruckus_vsz:
-  url: "https://your-vsz-controller.example.com:8443"
-  username: "admin"
-  password: "your_secure_password"
-  verify_ssl: true
-  timeout: 30
-  api_version: "v11_0"
+# =============================================================================
+# CONTROLLERS
+# =============================================================================
+# Define one or more vSZ controllers
+
+controllers:
+  - id: "vsz-prod"
+    name: "Production vSZ"
+    url: "https://vsz.example.com:8443"
+    username_env: "VSZ_PROD_USERNAME"   # Env var name for username
+    password_env: "VSZ_PROD_PASSWORD"   # Env var name for password
+    verify_ssl: false
+    timeout: 30
+    api_version: "v11_0"
+    tags:
+      - production
+
+  # Add more controllers as needed:
+  # - id: "vsz-dr"
+  #   name: "DR vSZ"
+  #   url: "https://vsz-dr.example.com:8443"
+  #   username_env: "VSZ_DR_USERNAME"
+  #   password_env: "VSZ_DR_PASSWORD"
+  #   verify_ssl: false
+  #   api_version: "v11_0"
+
+# Default controller (used when controller_id not specified)
+default_controller: "vsz-prod"
+
+# =============================================================================
+# SECURITY
+# =============================================================================
+
+security:
+  # API key for Bearer token auth (reads from env var)
+  api_key_env: "VSZ_API_KEY"
+  
+  # IP whitelist (optional, reads from env var)
+  # Format: comma-separated CIDRs
+  # allowed_ips_env: "VSZ_ALLOWED_IPS"
+  
+  # Rate limit per IP
+  rate_limit_per_minute: 60
+  
+  # Public endpoints (no auth required)
+  public_endpoints:
+    - "/healthz"
+    - "/health"
+    - "/mcp/info"
+
+# =============================================================================
+# SERVER
+# =============================================================================
 
 server:
   host: "0.0.0.0"

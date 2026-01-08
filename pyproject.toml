@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ruckus-vsz-mcp-server"
-version = "1.0.0"
-description = "MCP server for Ruckus Virtual SmartZone wireless controller management"
+version = "1.1.0"
+description = "MCP server for Ruckus Virtual SmartZone wireless controller management - Multi-controller, OpenWebUI compatible"
 authors = [{name = "0xEkho"}]
 license = {text = "MIT"}
 readme = "README.md"
@@ -17,16 +17,17 @@ dependencies = [
     "pydantic-settings>=2.2",
     "fastapi>=0.110",
     "uvicorn[standard]>=0.24",
+    "pyyaml>=6.0",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-keywords = ["mcp", "ruckus", "vsz", "smartzone", "wireless", "wifi", "network"]
+keywords = ["mcp", "ruckus", "vsz", "smartzone", "wireless", "wifi", "network", "openwebui", "multi-controller"]
 
 [project.urls]
 Homepage = "https://github.com/0xEkho/RUCKUS-vSZ-MCP"

@@ -280,5 +280,5 @@ docker-compose logs > ruckus-vsz-mcp.log
 ## Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/rpoulard/RUCKUS-vSZ-MCP/issues
-- Documentation: https://github.com/rpoulard/RUCKUS-vSZ-MCP
+- GitHub Issues: https://github.com/0xEkho/RUCKUS-vSZ-MCP/issues
+- Documentation: https://github.com/0xEkho/RUCKUS-vSZ-MCP

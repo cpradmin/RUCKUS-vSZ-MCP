@@ -116,6 +116,8 @@ class ZonesModule:
     ) -> Dict[str, Any]:
         """Get APs in a zone.
         
+        Multi-version: tries rkszones/{zone_id}/aps first, then query/ap with zone filter.
+        
         Args:
             zone_id: Zone UUID
             index: Starting index for pagination
@@ -124,12 +126,27 @@ class ZonesModule:
         Returns:
             List of APs in the zone
         """
-        params = {}
-        if index is not None:
-            params["index"] = index
+        # Try direct endpoint first (vSZ 7.x+)
+        try:
+            params = {}
+            if index is not None:
+                params["index"] = index
+            if list_size is not None:
+                params["listSize"] = list_size
+            return self.client.get(f"rkszones/{zone_id}/aps", params=params)
+        except Exception:
+            pass
+        
+        # Fallback: use query/ap with zone filter (vSZ 6.x)
+        data: Dict[str, Any] = {
+            "filters": [{"type": "ZONE", "value": zone_id}]
+        }
         if list_size is not None:
-            params["listSize"] = list_size
-        return self.client.get(f"rkszones/{zone_id}/aps", params=params)
+            data["limit"] = list_size
+        else:
+            data["limit"] = 100
+        
+        return self.client.post("query/ap", data)
 
     def get_zone_wlans(self, zone_id: str) -> Dict[str, Any]:
         """Get WLANs in a zone.
@@ -145,10 +162,23 @@ class ZonesModule:
     def list_domains(self) -> Dict[str, Any]:
         """List all domains.
         
+        Note: Requires administrative privileges. May fail with permission denied
+        on some vSZ configurations.
+        
         Returns:
             List of domains
         """
-        return self.client.get("domains")
+        try:
+            return self.client.get("domains")
+        except Exception as e:
+            error_msg = str(e).lower()
+            if "permission" in error_msg or "403" in error_msg or "401" in error_msg:
+                return {
+                    "error": "Permission denied. Domain listing requires super admin privileges.",
+                    "list": [],
+                    "totalCount": 0
+                }
+            raise
 
     def get_domain(self, domain_id: str) -> Dict[str, Any]:
         """Get domain details.

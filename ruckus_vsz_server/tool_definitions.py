@@ -303,6 +303,17 @@ TOOL_DEFINITIONS: List[Tuple[str, str, Dict[str, Any]]] = [
         },
     ),
     (
+        "ruckus.aps.get_lldp_neighbors",
+        "Get LLDP neighbors discovered by an AP. Shows connected switches, phones, and other devices with port info, capabilities, and power details",
+        {
+            "type": "object",
+            "properties": {
+                "ap_mac": {"type": "string", "description": "AP MAC address"},
+            },
+            "required": ["ap_mac"],
+        },
+    ),
+    (
         "ruckus.aps.query",
         "Query APs with filters",
         {

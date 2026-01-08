@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ruckus-vsz-mcp:
     build:
@@ -10,20 +8,24 @@ services:
     ports:
       - "8082:8082"
     environment:
-      # Ruckus vSZ Configuration
-      - RUCKUS_VSZ_URL=${RUCKUS_VSZ_URL}
-      - RUCKUS_VSZ_USERNAME=${RUCKUS_VSZ_USERNAME}
-      - RUCKUS_VSZ_PASSWORD=${RUCKUS_VSZ_PASSWORD}
-      - RUCKUS_VSZ_VERIFY_SSL=${RUCKUS_VSZ_VERIFY_SSL:-true}
-      - RUCKUS_VSZ_TIMEOUT=${RUCKUS_VSZ_TIMEOUT:-30}
-      - RUCKUS_VSZ_API_VERSION=${RUCKUS_VSZ_API_VERSION:-v11_0}
+      # Controller credentials (referenced in config.yaml)
+      - VSZ_PROD_USERNAME=${VSZ_PROD_USERNAME:-}
+      - VSZ_PROD_PASSWORD=${VSZ_PROD_PASSWORD:-}
+      # Add more controller credentials as needed:
+      # - VSZ_DR_USERNAME=${VSZ_DR_USERNAME:-}
+      # - VSZ_DR_PASSWORD=${VSZ_DR_PASSWORD:-}
+      # Security Settings
+      - VSZ_API_KEY=${VSZ_API_KEY:-}
+      - VSZ_ALLOWED_IPS=${VSZ_ALLOWED_IPS:-}
       # Server Settings
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - SERVER_PORT=${SERVER_PORT:-8082}
+    volumes:
+      # Mount config.yaml for controller configuration
+      - ../config.yaml:/app/config.yaml:ro
     networks:
       - ruckus-vsz-mcp-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/healthz"]
+      test: ["CMD", "python", "-c", "import requests; r=requests.get('http://localhost:8082/healthz'); exit(0 if r.ok else 1)"]
       interval: 30s
       timeout: 10s
       retries: 3

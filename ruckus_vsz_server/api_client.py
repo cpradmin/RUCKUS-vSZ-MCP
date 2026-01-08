@@ -190,9 +190,48 @@ class RuckusVSZClient:
         """GET request to Ruckus vSZ API."""
         return self._make_request(endpoint, method="GET", params=params)
 
-    def post(self, endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    def post(
+        self,
+        endpoint: str,
+        data: Dict[str, Any],
+        params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """POST request to Ruckus vSZ API."""
-        return self._make_request(endpoint, method="POST", data=data)
+        return self._make_request(endpoint, method="POST", data=data, params=params)
+
+    def try_endpoints(
+        self,
+        endpoints: list,
+        method: str = "GET",
+        data: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Try multiple endpoints for multi-version compatibility.
+        
+        Args:
+            endpoints: List of endpoint paths to try in order
+            method: HTTP method
+            data: Request body data
+            params: URL query parameters
+            
+        Returns:
+            Response from first successful endpoint
+            
+        Raises:
+            RuckusVSZAPIError: If all endpoints fail
+        """
+        last_error = None
+        for endpoint in endpoints:
+            try:
+                return self._make_request(endpoint, method=method, data=data, params=params)
+            except RuckusVSZAPIError as e:
+                last_error = e
+                if "404" not in str(e):
+                    raise  # Re-raise non-404 errors
+                logger.debug(f"Endpoint {endpoint} not found, trying next...")
+                continue
+        
+        raise RuckusVSZAPIError(f"All endpoints failed. Last error: {last_error}")
 
     def patch(self, endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """PATCH request to Ruckus vSZ API."""

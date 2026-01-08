@@ -1,153 +1,161 @@
 # Changelog
 
-All notable changes to the Ruckus vSZ MCP Server will be documented in this file.
+All notable changes to the Ruckus vSZ MCP Server.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.1.0] - 2026-01-08
 
-## [1.0.0] - 2024-12-28
+### Major Release — Multi-Controller, Security & LLM Optimization
 
-### Initial Release 🎉
+Complete overhaul adding enterprise features: multi-controller support, API security, and LLM-optimized responses.
 
-First stable release of Ruckus vSZ MCP Server - Complete Model Context Protocol integration for Ruckus Virtual SmartZone wireless controllers.
+### Added
 
-### Features
+#### Multi-Controller Support
+- **YAML-based configuration** via `config.yaml`
+- **Multiple vSZ controllers** with individual credentials
+- **Controller selection** via `controller_id` parameter in tool calls
+- **Controller manager** for connection pooling
+- **`/v1/controllers` endpoint** to list available controllers
 
-#### Core MCP Server
-- FastAPI-based HTTP server with MCP protocol v1.0 support
-- Session-based authentication with automatic token renewal
-- Comprehensive error handling and logging
-- Health check endpoint for monitoring
-- 46 MCP tools covering complete Ruckus vSZ API v11_0
+#### Security Features
+- **Bearer token authentication** for protected endpoints
+- **IP whitelisting** with CIDR support (e.g., `10.0.0.0/8`)
+- **Rate limiting** per IP address (configurable requests/minute)
+- **Security middleware** with comprehensive logging
+- **Public endpoints** bypass auth: `/healthz`, `/health`, `/mcp/info`
 
-#### API Modules (9 modules)
-- **System Module**: Controller information, licenses, inventory, cluster status
-- **Zones Module**: Zone and domain management with full CRUD operations
-- **WLANs Module**: WLAN/SSID lifecycle management (Open, WPA2, WPA3)
-- **Access Points Module**: AP management, monitoring, configuration, reboot
-- **Clients Module**: Connected client monitoring and management
-- **Authentication Module**: RADIUS and Hotspot profile management
-- **Network Module**: VLAN pools, QoS, ACL profiles
-- **Monitoring Module**: Statistics and performance data collection
-- **Alarms Module**: Alarm monitoring and acknowledgment
+#### LLM-Optimized Responses
+- **Response formatters** — Structured, compact JSON for all tools
+- **Null value removal** — Cleaner responses, fewer tokens
+- **Summary patterns** — Every list includes counts and pagination info
+- **Token efficiency** — 10-50x reduction in response size
 
-#### Tools Breakdown
-- **System**: 5 tools (info, inventory, summary, licenses, cluster)
-- **Zones**: 8 tools (list, get, create, update, delete, get APs/WLANs, domains)
-- **WLANs**: 7 tools (list, get, create, update, delete, enable/disable)
-- **Access Points**: 8 tools (list, get, update, delete, reboot, operational info, clients, query)
-- **Clients**: 4 tools (list, get, disconnect, query)
-- **Monitoring**: 4 tools (AP/WLAN/zone statistics, client count)
-- **Alarms**: 4 tools (list, get, acknowledge, summary)
-- **Authentication**: 3 tools (RADIUS profile management)
-- **Network**: 3 tools (VLAN pools, QoS profiles)
+#### New Files
+- `config.yaml` — Multi-controller configuration
+- `ruckus_vsz_server/security.py` — Security middleware
+- `ruckus_vsz_server/controller_manager.py` — Multi-controller management
+- `ruckus_vsz_server/response_formatters.py` — LLM-optimized formatters
+- `SECURITY_QUICKSTART.md` — Security setup guide
 
-#### Documentation
-- Comprehensive README with feature overview and quick start
-- Deployment guide for Docker and Python
-- 6 detailed usage examples following best practices:
-  1. List zones and network organization
-  2. Create guest WLAN with WPA2/WPA3
-  3. Monitor access point status and health
-  4. Client management and monitoring
-  5. Alarm monitoring and management
-  6. WLAN configuration updates
-- Complete API parameter documentation
-- Examples include curl commands, expected responses, and workflows
+### Changed
 
-#### Deployment
-- Dockerfile for containerized deployment
-- Docker Compose configuration with health checks
-- Environment variable configuration
-- Non-root container execution for security
-- Configurable server port (default: 8082)
+#### Configuration
+- Configuration now uses `config.yaml` (required)
+- Credentials via environment variable references (`username_env`, `password_env`)
+- Security settings via `api_key_env`, `allowed_ips_env`
 
-#### Security
-- Session-based authentication with service tickets
-- Automatic token renewal on expiration
-- SSL/TLS support with configurable verification
-- Secure credential storage via environment variables
-- Docker secrets support ready
+#### API Endpoints
+- `POST /mcp` — Requires Bearer token (unless public)
+- `GET /v1/controllers` — New endpoint for multi-controller
+- `GET /mcp/info` — Enhanced with security and controller info
 
-### API Coverage
+#### vSZ 6.x Compatibility
+- Fixed `query/ap` to use `limit` in body (not `listSize`)
+- Fixed `query/client` to use `limit` in body
+- Fixed `alert/alarm/list` endpoint for alarms
+- Fixed `/controller` list response extraction
 
-Based on Ruckus SmartZone Public API v11_0 (compatible with vSZ 7.1.1+):
-- ✅ System and controller management
-- ✅ Zone and domain operations
-- ✅ WLAN/SSID configuration and management
-- ✅ Access point lifecycle management
-- ✅ Client monitoring and control
-- ✅ RADIUS authentication configuration
-- ✅ Network services (VLAN, QoS, ACLs)
-- ✅ Statistics and monitoring
-- ✅ Alarm management
-- ✅ Query and advanced search operations
+#### Response Format
+All responses now follow LLM-friendly patterns:
 
-### Technical Stack
+```json
+// Before (raw API): ~5000 chars with nulls
+{"deviceName":"AP-01","description":null,"status":"Online","alerts":0,
+ "ip":"10.0.0.1","ipv6Address":null,"txRx":null,"noise24G":null,...}
 
-#### Dependencies
-- `mcp >= 1.1.0` - Model Context Protocol
-- `requests >= 2.32.0` - HTTP client
-- `pydantic >= 2.7` - Data validation
-- `pydantic-settings >= 2.2` - Settings management
-- `fastapi >= 0.110` - Web framework
-- `uvicorn[standard] >= 0.24` - ASGI server
-
-#### Requirements
-- Python 3.11+ or Docker
-- Ruckus vSZ controller (vSZ-E, vSZ-H, SZ144, SZ300)
-- Admin credentials with API access
-- Network connectivity to vSZ controller
-
-### Project Structure
+// After (v1.1.0): ~200 chars, structured
+{"summary":{"total":917,"online":882,"offline":35},
+ "aps":[{"name":"AP-01","status":"Online","ip":"10.0.0.1","model":"R750"}]}
 ```
-RUCKUS-vSZ-MCP/
-├── ruckus_vsz_server/       # Main application (16 files)
-│   ├── main.py              # FastAPI MCP server
-│   ├── api_client.py        # Ruckus vSZ API client
-│   ├── config.py            # Configuration management
-│   ├── tools.py             # MCP tool implementations
-│   ├── tool_definitions.py  # Tool metadata (46 tools)
-│   └── modules/             # API modules (9 modules)
-├── deploy/                  # Docker deployment
-├── examples/                # Usage examples (6 examples)
-├── README.md                # Main documentation
-├── CHANGELOG.md             # This file
-├── LICENSE                  # MIT License
-├── pyproject.toml           # Package configuration
-└── requirements.txt         # Python dependencies
+
+### Response Examples
+
+**System Summary:**
+```json
+{"controller":{"name":"vSZ01","model":"vSZ-H","version":"6.1.2.0.487"},
+ "totals":{"aps":917,"clients":593,"zones":13},"status":{"alerts":147}}
 ```
+
+**AP List:**
+```json
+{"summary":{"total":917,"online":882,"offline":35,"has_more":true},
+ "aps":[{"name":"AP-01","mac":"AA:BB:CC:DD:EE:FF","status":"Online",
+         "ip":"10.0.0.1","model":"R750","zone":"HQ","clients":15}]}
+```
+
+**Client List:**
+```json
+{"summary":{"total":593,"returned":10,"has_more":true},
+ "clients":[{"mac":"11:22:33:44:55:66","ip":"10.0.1.100",
+             "hostname":"laptop","user":"jdoe","ssid":"Corp","signal":-65}]}
+```
+
+**Alarm List:**
+```json
+{"summary":{"total":147,"critical":0,"major":35,"minor":12},
+ "alarms":[{"id":"123","type":"AP disconnected","severity":"Major"}]}
+```
+
+### Security Configuration
+
+```yaml
+# config.yaml
+security:
+  api_key_env: "VSZ_API_KEY"           # Bearer token from env var
+  allowed_ips_env: "VSZ_ALLOWED_IPS"   # CIDR list from env var
+  rate_limit_per_minute: 60
+  public_endpoints:
+    - "/healthz"
+    - "/health"
+    - "/mcp/info"
+```
+
+```bash
+# .env
+VSZ_API_KEY=your-32-char-hex-token
+VSZ_ALLOWED_IPS=10.0.0.0/8,192.168.0.0/16
+```
+
+### Breaking Changes
+
+- **Configuration required**: Must have `config.yaml` with at least one controller
+- **Auth required**: Protected endpoints require `Authorization: Bearer <token>`
+- **Response format changed**: All responses now use structured JSON format
 
 ### Compatibility
 
-- **API Version**: v11_0
-- **Tested with**: Ruckus SmartZone 7.1.1+
-- **Controller Models**: vSZ-E, vSZ-H, SZ144, SZ300
-- **Python**: 3.11, 3.12
-- **Docker**: Latest stable
+- Ruckus vSZ 6.x (tested with 6.1.2.0.487)
+- Ruckus vSZ 7.x (API v11_0)
+- OpenWebUI v0.6.31+
+- MCP Protocol 2024-11-05
 
-### Known Limitations
+#### LLDP Discovery (Added in this release)
+- **New tool: `ruckus.aps.get_lldp_neighbors`** — Discover LLDP neighbors (switches, phones) connected to APs
+  - Fields: `ap_port`, `neighbor_name`, `neighbor_ip`, `neighbor_port_desc`, `link_speed`
+  - Includes anti-hallucination note to prevent LLM from inventing data
 
-- Some advanced monitoring endpoints may not be available in all API versions
-- Specific features may require controller licenses
-- No caching of API responses (all calls are live)
+#### Multi-MCP Server Support
+- **Unique operation IDs** — All FastAPI endpoints now have `ruckus_` prefixed operationIds
+  - Prevents conflicts when using multiple MCP servers in OpenWebUI
+  - Example: `healthz_healthz_get` → `ruckus_healthz`
 
-### Future Enhancements
-
-Planned for future releases:
-- Additional authentication methods (OAuth, API keys)
-- Prometheus metrics endpoint
-- Advanced filtering and bulk operations
-- Configuration backup/restore tools
-- RF optimization and planning tools
-- Extended monitoring capabilities
-- Kubernetes deployment manifests
-- Comprehensive test coverage
+#### Additional vSZ 6.x Fixes
+- **`zones.get_aps`** — Now uses `query/ap` with zone filter
+- **`zones.list_domains`** — Returns friendly error for permission denied
+- **`aps.get_operational_info`** — Fallback to `query/ap` when endpoint returns 404
+- **`aps.get_clients`** — Uses `query/client` with AP filter
+- **`clients.get`** — Fixed query format (`limit` instead of `listSize`)
+- **`alarms.get`** — Queries alarm list and finds by ID when direct endpoint fails
+- **`network.list_vlan_pools`** — Tries multiple endpoints with friendly error fallback
+- **`network.list_qos_profiles`** — Tries multiple endpoints with friendly error fallback
 
 ---
 
-For detailed installation and usage instructions, see [README.md](README.md).
+## [1.0.0] - 2026-01-01
 
-For usage examples, see [examples/](examples/).
+### Initial Release
 
-For deployment guide, see [deploy/README.md](deploy/README.md).
+- 46 MCP tools across 9 modules
+- OpenWebUI MCP Streamable HTTP support
+- Docker deployment
+- Basic authentication via environment variables
