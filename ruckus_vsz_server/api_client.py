@@ -16,6 +16,7 @@ from .modules import (
     NetworkModule,
     MonitoringModule,
     AlarmModule,
+    SwitchesModule,
 )
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ class RuckusVSZClient:
         self.authentication = AuthenticationModule(self)
         self.network = NetworkModule(self)
         self.monitoring = MonitoringModule(self)
+        self.switches = SwitchesModule(self)
         self.alarms = AlarmModule(self)
 
     def authenticate(self) -> str:

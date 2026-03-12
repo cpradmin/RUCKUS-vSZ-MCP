@@ -9,6 +9,7 @@ from .authentication import AuthenticationModule
 from .network import NetworkModule
 from .monitoring import MonitoringModule
 from .alarms import AlarmModule
+from .switches import SwitchesModule
 
 __all__ = [
     "SystemModule",
@@ -20,4 +21,5 @@ __all__ = [
     "NetworkModule",
     "MonitoringModule",
     "AlarmModule",
+    "SwitchesModule",
 ]

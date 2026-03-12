@@ -512,3 +512,150 @@ class RuckusVSZTools:
             return fmt.format_generic(result)
         except RuckusVSZAPIError as e:
             return fmt.format_error(str(e))
+
+    # ---- Switch Module Tools ----
+
+    def switches_list(self) -> str:
+        """List all ICX switches managed by this controller."""
+        try:
+            result = self.client.switches.list_switches()
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get(self, switch_id: str) -> str:
+        """Get details for a specific ICX switch."""
+        try:
+            result = self.client.switches.get_switch(switch_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_health(self, switch_id: str) -> str:
+        """Get hardware health: CPU, memory, temperature, fans, PSUs."""
+        try:
+            result = self.client.switches.get_switch_health(switch_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_firmware(self, switch_id: str) -> str:
+        """Get firmware version and upgrade availability."""
+        try:
+            result = self.client.switches.get_switch_firmware(switch_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_config(self, switch_id: str) -> str:
+        """Get running configuration backup."""
+        try:
+            result = self.client.switches.get_switch_config(switch_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_list_ports(self, switch_id: str) -> str:
+        """List all ports with status, speed, VLAN, error counts."""
+        try:
+            result = self.client.switches.list_ports(switch_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_port_errors(self, switch_id: str, port_id=None) -> str:
+        """Get CRC/error counters. High CRC + low RX = bad SFP or fiber."""
+        try:
+            result = self.client.switches.get_port_errors(switch_id, port_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_lldp_topology(self, switch_id: str) -> str:
+        """Get LLDP neighbor table mapping APs, DMS signs, cameras to switch ports."""
+        try:
+            result = self.client.switches.get_lldp_topology(switch_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_list_alarms(self, switch_id: str, severity=None) -> str:
+        """Get active alarms for a switch."""
+        try:
+            result = self.client.switches.list_switch_alarms(switch_id, severity)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_stack(self, stack_id: str) -> str:
+        """Get ICX stack unit inventory, roles, and inter-unit link status."""
+        try:
+            result = self.client.switches.get_stack_details(stack_id)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_list_stacks(self) -> str:
+        """List all ICX stacks on this controller."""
+        try:
+            result = self.client.switches.list_stacks()
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_reboot(self, switch_id: str) -> str:
+        """Reboot a switch. USE WITH CAUTION on live corridor infrastructure."""
+        try:
+            self.client.switches.reboot_switch(switch_id)
+            return fmt.format_success(f"Reboot triggered for switch {switch_id}")
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_upgrade_firmware(self, switch_id: str, firmware_version=None) -> str:
+        """Trigger firmware upgrade on a switch. USE WITH CAUTION."""
+        try:
+            self.client.switches.upgrade_firmware(switch_id, firmware_version)
+            return fmt.format_success(f"Firmware upgrade triggered for switch {switch_id}")
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_optics(self, switch_ip: str, username="admin", password="admin") -> str:
+        """Get SFP Tx/Rx dBm per port via RESTCONF. Healthy range: -3 to -20 dBm Rx."""
+        try:
+            result = self.client.switches.get_optics(switch_ip, username, password)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_lag_status(self, switch_ip: str, username="admin", password="admin") -> str:
+        """Get LAG member status and bandwidth via RESTCONF."""
+        try:
+            result = self.client.switches.get_lag_status(switch_ip, username, password)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_ospf_neighbors(self, switch_ip: str, username="admin", password="admin") -> str:
+        """Get OSPF neighbor adjacency state via RESTCONF."""
+        try:
+            result = self.client.switches.get_ospf_neighbors(switch_ip, username, password)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_mac_table(self, switch_ip: str, vlan_id=None, port=None,
+                               username="admin", password="admin") -> str:
+        """Get MAC address table via RESTCONF, optionally filtered by VLAN or port."""
+        try:
+            result = self.client.switches.get_mac_table(switch_ip, vlan_id, port, username, password)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
+
+    def switches_get_vlan_config(self, switch_ip: str, username="admin", password="admin") -> str:
+        """Get VLAN tagged/untagged port assignments via RESTCONF."""
+        try:
+            result = self.client.switches.get_vlan_config(switch_ip, username, password)
+            return fmt.format_generic(result)
+        except RuckusVSZAPIError as e:
+            return fmt.format_error(str(e))
