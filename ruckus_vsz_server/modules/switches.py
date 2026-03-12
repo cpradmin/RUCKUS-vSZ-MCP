@@ -240,9 +240,10 @@ class SwitchesModule:
         """
         import requests, urllib3
         urllib3.disable_warnings()
-        url = f"https://{switch_ip}/rest/v1/{yang_path}"
+        url = f"https://{switch_ip}/restconf/data/{yang_path}"
+        headers = {"Accept": "application/yang-data+json"}
         resp = requests.get(url, auth=(username, password),
-                            verify=False, timeout=10)
+                            headers=headers, verify=False, timeout=10)
         resp.raise_for_status()
         return resp.json()
 
@@ -286,7 +287,8 @@ class SwitchesModule:
             aggregate bandwidth
         """  # PRIORITY - monitors the 20Gbps inter-stack LAGs
         return self._restconf_get(switch_ip,
-            "brocade-lag:lag", username, password)
+            "interfaces?fields=interface/openconfig-if-aggregate:aggregation",
+            username, password)
 
     def get_ospf_neighbors(self, switch_ip: str,
                            username: str = "admin",
@@ -302,7 +304,8 @@ class SwitchesModule:
             OSPF neighbors with state (Full/Init/Down), router-id, interface
         """
         return self._restconf_get(switch_ip,
-            "brocade-ospf:ospf/ospf-neighbor", username, password)
+            "network-instances/network-instance/default-vrf/protocols/protocol/openconfig-policy-types:OSPF/ospf/areas",
+            username, password)
 
     def get_mac_table(self, switch_ip: str,
                       vlan_id: Optional[int] = None,
@@ -321,7 +324,7 @@ class SwitchesModule:
         Returns:
             MAC table entries with port, VLAN, type (dynamic/static)
         """
-        path = "brocade-mac-address-table:mac-address-table"
+        path = "network-instances/network-instance/default-vrf/fdb"
         data = self._restconf_get(switch_ip, path, username, password)
         if vlan_id or port:
             entries = data.get("mac-address-table", {}).get("mac-address", [])
@@ -346,4 +349,5 @@ class SwitchesModule:
             VLAN list with tagged and untagged port assignments
         """
         return self._restconf_get(switch_ip,
-            "brocade-vlan:vlan", username, password)
+            "network-instances/network-instance/default-vrf/vlans",
+            username, password)
